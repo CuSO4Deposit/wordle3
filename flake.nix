@@ -44,6 +44,7 @@
                       extensions = ".tsx?$";
                     };
                   };
+                  markdownlint.enable = true;
                   nixfmt-rfc-style.enable = true;
                   prettier.enable = true;
                 };
