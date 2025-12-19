@@ -98,40 +98,46 @@ export default function WordleGame() {
     );
   }
 
-  const validateInput = (
-    input: string,
-  ): { valid: boolean; unit?: string; message?: string } => {
-    const trimmed = input.trim();
-    if (!trimmed) {
-      return { valid: false, message: "请输入一个汉字或英文单词" };
-    }
-    if (trimmed.length === 1 && /^[\u4e00-\u9fff]$/.test(trimmed)) {
-      return { valid: true, unit: trimmed };
-    }
-    if (/^[a-zA-Z]+$/.test(trimmed)) {
-      return { valid: true, unit: trimmed };
-    }
-    return { valid: false, message: "请输入一个汉字或仅由英文字母组成的单词" };
+  const splitMixedText = (text: string, isChinese: boolean): string[] => {
+    const units = isChinese
+      ? Array.from(text)
+      : text.split(/\s+/).filter(Boolean);
+    return units;
   };
 
   const handleSubmit = () => {
     setErrorMessage("");
-    const { valid, unit, message } = validateInput(inputValue);
-    if (!valid) {
-      setErrorMessage(message || "输入格式不正确");
+    const trimmed = inputValue.trim();
+    if (!trimmed) {
+      setErrorMessage("请输入内容");
       return;
     }
 
-    if (guessedUnits.has(unit!)) {
+    const units = splitMixedText(trimmed, isChinese);
+    if (units.length === 0) {
+      setErrorMessage("未检测到有效输入");
+    }
+
+    const newUnits = units.filter((unit) => !guessedUnits.has(unit));
+    if (newUnits.length === 0) {
       setInputValue("");
-      return;
     }
 
-    setGuessedUnits((prev) => new Set(prev).add(unit!));
+    setGuessedUnits((prev) => {
+      const newSet = new Set(prev);
+      newUnits.forEach((unit) => newSet.add(unit));
+      return newSet;
+    });
 
-    const exists = allTokens.some((t) => t.value === unit);
-    if (!exists) {
-      setNonExistentUnits((prev) => new Set(prev).add(unit!));
+    const nonExistent = newUnits.filter(
+      (unit) => !allTokens.some((t) => t.value === unit),
+    );
+    if (nonExistent.length > 0) {
+      setNonExistentUnits((prev) => {
+        const newSet = new Set(prev);
+        nonExistent.forEach((unit) => newSet.add(unit));
+        return newSet;
+      });
     }
 
     setInputValue("");
@@ -210,7 +216,11 @@ export default function WordleGame() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isChinese ? "输入一个汉字" : "输入一个英文单词"}
+              placeholder={
+                isChinese
+                  ? "现在可以输入一坨东西了！"
+                  : "诶我好像还没上线英文版本，如果你看到这句话了就提醒我一下改这里"
+              }
               className="flex-1 px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
