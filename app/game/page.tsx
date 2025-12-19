@@ -42,7 +42,11 @@ export default function WordleGame() {
 
   const isChinese = gameData?.language === "zh";
 
-  const tokenize = (text: string, source: "title" | "content"): Token[] => {
+  const tokenize = (
+    text: string,
+    source: "title" | "content",
+    isChinese: boolean,
+  ): Token[] => {
     const punctuationRegex = /\p{P}/u;
     const units = isChinese
       ? Array.from(text)
@@ -57,16 +61,18 @@ export default function WordleGame() {
 
   const allTokens = useMemo(() => {
     if (!gameData) return [];
+    const isChinese = gameData?.language === "zh";
     return [
-      ...tokenize(gameData.title, "title"),
-      ...tokenize(gameData.content, "content"),
+      ...tokenize(gameData.title, "title", isChinese),
+      ...tokenize(gameData.content, "content", isChinese),
     ];
   }, [gameData]);
 
   const titleNonPunctUnits = useMemo(() => {
     if (!gameData) return new Set<string>();
+    const isChinese = gameData?.language === "zh";
     return new Set(
-      tokenize(gameData.title, "title")
+      tokenize(gameData.title, "title", isChinese)
         .filter((t) => !t.isPunctuation)
         .map((t) => t.value),
     );
