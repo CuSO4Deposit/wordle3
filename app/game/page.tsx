@@ -3,6 +3,7 @@
 import { toSimplified } from "chinese-simple2traditional";
 import { useState, useEffect, useMemo } from "react";
 import { GameData } from "./data";
+import { randomPageFiltered } from "@/app/wikipedia/lib";
 
 type Token = {
   id: number;
@@ -33,11 +34,7 @@ export default function WordleGame() {
   useEffect(() => {
     const fetchRandomWiki = async () => {
       try {
-        const res = await fetch("/api/wikipedia");
-        if (!res.ok) {
-          throw new Error("Failed to load");
-        }
-        const data = await res.json();
+        const data = await randomPageFiltered();
         setGameData(wash(data));
       } catch {
         setErrorMessage("无法加载维基百科内容，请重试。");
@@ -98,7 +95,17 @@ export default function WordleGame() {
   }, [guessedUnits, titleNonPunctUnits, isComplete]);
 
   if (loading) {
-    return <div className="p-10">正在加载随机文章……</div>;
+    return (
+      <div className="p-10">
+        正在加载随机百科……
+        <br />
+        过滤地理和人物重试需要时间，请耐心等待～
+        <br />
+        <s>无聊了可以打开 console log 看看重试了多少次</s>
+        <br />
+        <s>别去，去了会被剧透答案</s>
+      </div>
+    );
   }
 
   if (!gameData) {
