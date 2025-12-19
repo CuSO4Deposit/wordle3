@@ -1,5 +1,6 @@
 "use client";
 
+import { toSimplified } from "chinese-simple2traditional";
 import { useState, useEffect, useMemo } from "react";
 import { GameData } from "./data";
 
@@ -21,6 +22,14 @@ export default function WordleGame() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const wash = (data: GameData): GameData => {
+    return {
+      ...data,
+      title: toSimplified(data.title.replace(/\s+/g, "")),
+      content: toSimplified(data.content.replace(/\s+/g, "")),
+    };
+  };
+
   useEffect(() => {
     const fetchRandomWiki = async () => {
       try {
@@ -29,7 +38,7 @@ export default function WordleGame() {
           throw new Error("Failed to load");
         }
         const data = await res.json();
-        setGameData(data);
+        setGameData(wash(data));
       } catch {
         setErrorMessage("无法加载维基百科内容，请重试。");
       } finally {
